@@ -3,13 +3,10 @@ from bson import json_util
 import json
 from configPack import mongo
 from Services.mailService import sendVerificationMail
+from werkzeug.security import generate_password_hash
 
 
 class UserModel():
-    def getAll():
-        users = list(mongo.db.users.find())
-        return users
-
     def save(user):
         formatAttributes(user)
         if (not exist(user)):
@@ -34,6 +31,7 @@ def registerAndNotify(user):
 
 
 def formatAttributes(user):
+    user["password"] = generate_password_hash(user["password"])
     user["email"] = user["email"].lower()
     user["name"] = user["name"].lower().capitalize()
     user["lastName"] = user["lastName"].lower().capitalize()
@@ -41,9 +39,12 @@ def formatAttributes(user):
 
 
 def exist(user):
-    search = mongo.db.users.find({"email": user["email"]})
-    search = json.loads(json_util.dumps(search))
-    return search
+    try:
+        search = mongo.db.users.find_one({"email": user["email"]})
+        search = json.loads(json_util.dumps(search))
+        return search
+    except:
+        return []
 
 
 def clearObjects(user):
