@@ -11,17 +11,15 @@ class UserModel():
         return users
 
     def save(user):
-        search = mongo.db.users.find({"email": user["email"]})
-        search = json.loads(json_util.dumps(search))
-        if (search == []):
+        formatAttributes(user)
+        if (not exist(user)):
             try:
                 registerAndNotify(user)
-                del user['_id']
-                del user['createdAt']
+                clearObjects(user)
                 data, code = json.dumps(user), 200
             except:
                 data = {"message": "un probleme est survenue lors de l'inscription"}
-                data, code = json.dumps(data), 504
+                data, code = json.dumps(data), 503
         else:
             data = {"message": user["email"] + " existe deja!"}
             data, code = json.dumps(data), 409
@@ -33,3 +31,21 @@ def registerAndNotify(user):
     user["favoriteCategories"] = []
     mongo.db.users.insert_one(user)
     sendVerificationMail(user["email"], user["name"])
+
+
+def formatAttributes(user):
+    user["email"] = user["email"].lower()
+    user["name"] = user["name"].lower().capitalize()
+    user["lastName"] = user["lastName"].lower().capitalize()
+    user["ville"] = user["ville"].lower().capitalize()
+
+
+def exist(user):
+    search = mongo.db.users.find({"email": user["email"]})
+    search = json.loads(json_util.dumps(search))
+    return search
+
+
+def clearObjects(user):
+    del user['_id']
+    del user['createdAt']
