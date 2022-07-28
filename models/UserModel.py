@@ -1,12 +1,29 @@
-from datetime import datetime
-from bson import json_util
 import json
 from configPack import mongo
-from Services.mailService import sendVerificationMail
-from werkzeug.security import generate_password_hash
+from models.UserUtils import clearObjects, getMail, formatAttributes
+from models.UserMongoUtils import exist, registerAndNotify, updateUser
+from werkzeug.security import check_password_hash
 
 
 class UserModel():
+    def find(token, cleanObjects=True):
+        email = getMail(token)
+        if(email):
+            try:
+                user = mongo.db.users.find_one({"email": email})
+                if not cleanObjects:
+                    return user, 200
+                clearObjects(user)
+                data = {"user": user}
+                data, code = json.dumps(data), 200
+            except:
+                data = {"message": "un probleme est survenu"}
+                data, code = json.dumps(data), 503
+        else:
+            data = {"message": "invalid access token"}
+            data, code = json.dumps(data), 401
+        return data, code
+
     def save(user):
         formatAttributes(user)
         if (not exist(user)):
@@ -22,31 +39,26 @@ class UserModel():
             data, code = json.dumps(data), 409
         return data, code
 
-
-def registerAndNotify(user):
-    user["createdAt"] = datetime.now()
-    user["favoriteCategories"] = []
-    mongo.db.users.insert_one(user)
-    sendVerificationMail(user["email"], user["name"])
-
-
-def formatAttributes(user):
-    user["password"] = generate_password_hash(user["password"])
-    user["email"] = user["email"].lower()
-    user["name"] = user["name"].lower().capitalize()
-    user["lastName"] = user["lastName"].lower().capitalize()
-    user["ville"] = user["ville"].lower().capitalize()
-
-
-def exist(user):
-    try:
-        search = mongo.db.users.find_one({"email": user["email"]})
-        search = json.loads(json_util.dumps(search))
-        return search
-    except:
-        return []
-
-
-def clearObjects(user):
-    del user['_id']
-    del user['createdAt']
+    def update(token, user):
+        data, code = UserModel.find(token, cleanObjects=False)
+        mongoUser = data
+        if (code == 200):
+            if ("password" in user):
+                if not check_password_hash(mongoUser["password"], user["password"]):
+                    data = {"message": "mot de passe incorrect"}
+                    data, code = json.dumps(data), 403
+                else:
+                    if ("newPassword" in user):
+                        formatAttributes(user, update=True)
+                        data, code = updateUser(user, {"email": mongoUser["email"]},
+                                                {"$set": {"email": user["email"],
+                                                          "password": user["newPassword"]}})
+                    else:
+                        data, code = updateUser(user, {"email": mongoUser["email"]},
+                                                {"$set": {"password": user["newPassword"]}})
+            else:
+                data, code = updateUser(user, {"email": mongoUser["email"]},
+                                        {"$set": {"name": user["name"],
+                                                  "lastName": user["lastName"],
+                                                  "ville": user["ville"]}})
+        return data, code
