@@ -3,6 +3,7 @@ from configPack import mongo
 from models.UserUtils import clearObjects, getMail, formatAttributes
 from models.UserMongoUtils import exist, registerAndNotify, updateUser
 from werkzeug.security import check_password_hash
+from bson import json_util
 
 
 class UserModel():
@@ -12,6 +13,7 @@ class UserModel():
             try:
                 user = mongo.db.users.find_one({"email": email})
                 if not cleanObjects:
+                    user = json.loads(json_util.dumps(user))
                     return user, 200
                 clearObjects(user)
                 data = {"user": user}
@@ -48,14 +50,27 @@ class UserModel():
                     data = {"message": "mot de passe incorrect"}
                     data, code = json.dumps(data), 403
                 else:
-                    if ("newPassword" in user):
-                        formatAttributes(user, update=True)
-                        data, code = updateUser(user, {"email": mongoUser["email"]},
-                                                {"$set": {"email": user["email"],
-                                                          "password": user["newPassword"]}})
+                    if (mongoUser["email"] != user["email"]):
+                        if not exist(user):
+                            if ("newPassword" in user):
+                                formatAttributes(user, update=True)
+                                data, code = updateUser(user, {"email": mongoUser["email"]},
+                                                        {"$set": {"email": user["email"],
+                                                                  "password": user["newPassword"]}})
+                            else:
+                                data, code = updateUser(user, {"email": mongoUser["email"]},
+                                                        {"$set": {"email": user["email"]}})
+                        else:
+                            data = {
+                                "message": user["email"] + " est associé à un autre compte"}
+                            data, code = json.dumps(data), 403
                     else:
-                        data, code = updateUser(user, {"email": mongoUser["email"]},
-                                                {"$set": {"password": user["newPassword"]}})
+                        if ("newPassword" in user):
+                            formatAttributes(user, update=True)
+                            data, code = updateUser(user, {"email": mongoUser["email"]},
+                                                    {"$set": {"password": user["newPassword"]}})
+                        else:
+                            data, code = json.dumps(user), 200
             else:
                 data, code = updateUser(user, {"email": mongoUser["email"]},
                                         {"$set": {"name": user["name"],
