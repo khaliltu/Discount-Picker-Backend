@@ -2,8 +2,10 @@ from datetime import datetime, timedelta
 import json
 import jwt
 import os
-from models.UserModel import exist
 from werkzeug.security import check_password_hash
+from models.UserMongoUtils import exist, updateUser
+from models.UserModel import UserModel
+from models.UserUtils import formatAttributes
 
 
 class LoginModel():
@@ -23,6 +25,21 @@ class LoginModel():
                 data = {"token": token,
                         "userName": userName}
                 data, code = json.dumps(data), 200
+        return data, code
+
+    def update(token, user):
+        data, code = UserModel.find(token, cleanObjects=False)
+        if code == 200:
+            print(user)
+            mongoUser = data
+            if not check_password_hash(mongoUser["password"], user["password"]):
+                data, code = json.dumps(
+                    {"message": "mot de passse incorrect"}), 401
+            else:
+                formatAttributes(user, update=True)
+                data, code = updateUser(user, {"email": mongoUser["email"]},
+                                        {"$set": {"password": user["newPassword"]}})
+                data = json.dumps(data)
         return data, code
 
 

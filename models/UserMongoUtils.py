@@ -26,9 +26,8 @@ def updateUser(newUser, filter, newValues):
     newValues = newValues
     try:
         mongo.db.users.update_one(filter, newValues)
-        data = {"user": newUser}
-        data, code = json.dumps(data), 200
+        data, code = {"user": newUser}, 200
     except:
-        data = {"message": "erreur lors de la connection à la base de données"}
-        data, code = json.dumps(data), 503
+        data, code = {
+            "message": "erreur lors de la connection à la base de données"}, 503
     return data, code

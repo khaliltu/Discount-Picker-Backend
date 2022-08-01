@@ -10,3 +10,9 @@ class LoginService(Resource):
         user = json_util.loads(json_util.dumps(request.json))
         data, code = LoginModel.login(user)
         return Response(data, status=code, mimetype='application/json')
+
+    def put(self):
+        token = json_util.loads(json_util.dumps(request.headers.get('token')))
+        user = json_util.loads(json_util.dumps(request.json))
+        data, code = LoginModel.update(token, user)
+        return Response(data, status=code, mimetype='application/json')

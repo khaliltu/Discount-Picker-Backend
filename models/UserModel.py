@@ -2,7 +2,6 @@ import json
 from configPack import mongo
 from models.UserUtils import clearObjects, getMail, formatAttributes
 from models.UserMongoUtils import exist, registerAndNotify, updateUser
-from werkzeug.security import check_password_hash
 from bson import json_util
 
 
@@ -42,38 +41,15 @@ class UserModel():
         return data, code
 
     def update(token, user):
-        data, code = UserModel.find(token, cleanObjects=False)
-        mongoUser = data
-        if (code == 200):
-            if ("password" in user):
-                if not check_password_hash(mongoUser["password"], user["password"]):
-                    data = {"message": "mot de passe incorrect"}
-                    data, code = json.dumps(data), 403
-                else:
-                    if (mongoUser["email"] != user["email"]):
-                        if not exist(user):
-                            if ("newPassword" in user):
-                                formatAttributes(user, update=True)
-                                data, code = updateUser(user, {"email": mongoUser["email"]},
-                                                        {"$set": {"email": user["email"],
-                                                                  "password": user["newPassword"]}})
-                            else:
-                                data, code = updateUser(user, {"email": mongoUser["email"]},
-                                                        {"$set": {"email": user["email"]}})
-                        else:
-                            data = {
-                                "message": user["email"] + " est associé à un autre compte"}
-                            data, code = json.dumps(data), 403
-                    else:
-                        if ("newPassword" in user):
-                            formatAttributes(user, update=True)
-                            data, code = updateUser(user, {"email": mongoUser["email"]},
-                                                    {"$set": {"password": user["newPassword"]}})
-                        else:
-                            data, code = json.dumps(user), 200
-            else:
-                data, code = updateUser(user, {"email": mongoUser["email"]},
-                                        {"$set": {"name": user["name"],
-                                                  "lastName": user["lastName"],
-                                                  "ville": user["ville"]}})
+        data, code = UserModel.find(token)
+        if code == 200:
+            mongoUser = json.loads(data)['user']
+            print(mongoUser)
+            print(user)
+            data, code = updateUser(user, {"email": mongoUser["email"]},
+                                    {"$set": {"name": user["name"],
+                                              "lastName": user["lastName"],
+                                              "ville": user["ville"]}})
+            data = json.dumps(data)
+            return data, code
         return data, code
