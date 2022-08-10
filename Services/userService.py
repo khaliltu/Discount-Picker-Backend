@@ -1,8 +1,8 @@
 
 from bson import json_util
 from flask_restful import Resource
-from models.UserModel import UserModel
 from flask import request, Response
+from models.UserModel import UserModel
 
 
 class UserService(Resource):

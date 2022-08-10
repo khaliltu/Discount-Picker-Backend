@@ -1,7 +1,7 @@
 import json
 from configPack import mongo
-from models.UserUtils import clearObjects, getMail, formatAttributes
-from models.UserMongoUtils import exist, registerAndNotify, updateUser
+from models.utils.UserUtils import clearObjects, getMail, formatAttributes
+from models.utils.UserMongoUtils import exist, registerAndNotify, updateUser
 from bson import json_util
 
 

@@ -3,9 +3,9 @@ import json
 import jwt
 import os
 from werkzeug.security import check_password_hash
-from models.UserMongoUtils import exist, updateUser
+from models.utils.UserMongoUtils import exist, updateUser
 from models.UserModel import UserModel
-from models.UserUtils import formatAttributes
+from models.utils.UserUtils import formatAttributes
 
 
 class LoginModel():
