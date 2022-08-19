@@ -1,19 +1,24 @@
+from itertools import product
 from math import prod
 from models.UserModel import UserModel
 from configPack import mongo
 from bson.json_util import dumps
 from bson.objectid import ObjectId
-from scrapers.jumiaProductScrapper import getJumiaDetails
-from scrapers.ttechProductScrapper import getTTDetails
-from scrapers.vongoProductScrapper import getVongoDetails
+
+from Services.scrapers.tdiscountProductScraper import getTdiscountDetails
+from .utils.ProductUtils import isSubString
+from Services.scrapers.jumiaProductScrapper import getJumiaDetails
+from Services.scrapers.ttechProductScrapper import getTTDetails
+from Services.scrapers.vongoProductScrapper import getVongoDetails
 
 
 class ProductModel():
     def getAll(token):
         data, code = UserModel.find(token, cleanObjects=False)
         if (code == 200):
-            products = mongo.db.products.find()
-            data = dumps(products)
+            products = list(mongo.db.products.find())
+            data = {"products": products}
+            data = dumps(data)
         return data, code
 
     def insert(products):
@@ -54,7 +59,14 @@ def registerProductDetails(product):
             pass
     if (product["website"] == "TUNISIATECH"):
         try:
-            product["key value details"] = getTTDetails(
+            product["details"], product["key value details"] = getTTDetails(
                 product["Product link"])
+        except:
+            pass
+    if (product["website"] == "TDISCOUNT"):
+        try:
+            product["details"] = getTdiscountDetails(
+                product["Product link"])
+            product["key value details"] = []
         except:
             pass

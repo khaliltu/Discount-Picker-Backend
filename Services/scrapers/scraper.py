@@ -1,7 +1,8 @@
 from models.ProductModel import ProductModel
-from scrapers.jumiaScraper import getProducts, getProductsLinks
-from scrapers.tunisiaTechScraper import getTTProductsList
-from scrapers.vongoScrapper import getVongoProductsList
+from Services.scrapers.jumiaScraper import getProducts
+from .tdiscountScraper import getTdiscountProductsList
+from Services.scrapers.tunisiaTechScraper import getTTProductsList
+from Services.scrapers.vongoScrapper import getVongoProductsList
 
 
 def getJumiaPromos(link):
@@ -15,6 +16,14 @@ def getJumiaPromos(link):
 def getTTPromos(link):
     try:
         products = getTTProductsList(link)
+        insertProducts(products)
+    except:
+        pass
+
+
+def getTdiscountPromos(link):
+    try:
+        products = getTdiscountProductsList(link)
         insertProducts(products)
     except:
         pass

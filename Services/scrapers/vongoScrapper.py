@@ -20,10 +20,14 @@ def getDiscount(initialPrice, price):
 
 def getProductItems(tag):
     initialPrice = tag.find("span", {"class": "old-price"}).text
+    initialPrice = initialPrice.replace("DT", "").strip()
     if "Ancien prix:" in initialPrice:
         initialPrice = initialPrice.replace("Ancien prix:", "").strip()
     price = tag.find("span", {"class": "price"}).text.strip()
+    price = price.replace("DT", "").strip()
     discount = getDiscount(initialPrice, price)
+    initialPrice = float(initialPrice.replace(",", "."))
+    price = float(price.replace(",", "."))
     name = tag.find("a", {"class": "product-name"}).text
     return name, price, initialPrice, discount
 

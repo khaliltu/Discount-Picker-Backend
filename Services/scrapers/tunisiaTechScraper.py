@@ -25,6 +25,7 @@ def getProductPrices(product):
         if "Promo !" in priceList[i]:
             priceList[i] = priceList[i].replace("Promo !", '')
             break
+    priceList = [float(price.replace(",", ".").strip()) for price in priceList]
     return tuple(priceList)
 
 

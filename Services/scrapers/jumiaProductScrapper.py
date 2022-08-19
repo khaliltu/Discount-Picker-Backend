@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup as bs
 
-from scrapers.scrapUtils import deleteBlank
+from Services.scrapers.scrapUtils import deleteBlank
 
 
 def getInfoSection(link):

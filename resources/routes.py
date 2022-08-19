@@ -1,9 +1,9 @@
 
-from Services.productsService import ProductsService
-from Services.productService import ProductService
-from Services.userService import UserService
-from Services.loginService import LoginService
-from Services.homeProductsService import HomeProductService
+from controllers.productsController import ProductsService
+from controllers.productController import ProductService
+from controllers.userController import UserService
+from controllers.loginController import LoginService
+from controllers.homeProductsController import HomeProductService
 
 
 def initialize_routes(api):

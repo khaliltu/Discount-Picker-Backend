@@ -24,10 +24,11 @@ def extractInfos(tag):
             break
     price = price[::-1]
     name = tag.attrs["data-name"]
-    intialPrice = items[1]
-    price = str(float(price))
+    intialPrice = float(items[1])
+    price = float(price)
     discount = items[2].split("%")[0]
     category = tag.attrs["data-category"]
+    category = category.split("/")[0]
     brand = tag.attrs["data-brand"]
     return name, price, intialPrice, discount, category, brand
 
