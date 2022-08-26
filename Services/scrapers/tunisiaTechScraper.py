@@ -53,8 +53,16 @@ def getTTProductsList(link):
             continue
         name = getProductName(info)
         productLink, imageLink = getProductLinks(article)
+        doc = requests.get(productLink)
+        htmlDoc = bs(doc.content, "html.parser")
+        spans = htmlDoc.find_all("span", {"itemprop": "name"})
+        for span in spans:
+            if span.text == "Accueil":
+                i = spans.index(span)+1
+                break
+        cat = spans[i].text
         product = {"name": name, "price": price, "Initial Price": initialPrice,
                    "Discount Amount": discount, "Product link": productLink,
-                   "Image Link": imageLink, "website": "TUNISIATECH"}
+                   "Image Link": imageLink, "category": cat, "website": "TUNISIATECH"}
         productsList.append(product)
     return productsList

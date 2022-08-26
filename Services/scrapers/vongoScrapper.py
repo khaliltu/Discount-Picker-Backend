@@ -47,8 +47,11 @@ def getVongoProductsList(link):
             name, price, initialPrice, discount = getProductItems(tag)
             productLink, productImageLink = getProductLinks(tag)
             website = "VONGO"
+            doc = requests.get("productLink")
+            htmlDoc = bs(doc.content, "html.parser")
+            cat = htmlDoc.find("span", {"itemprop": "title"})
             product = {"name": name, "price": price, "Initial Price": initialPrice, "Discount Amount": discount,
-                       "Product link": productLink, "Image Link": productImageLink, "website": website}
+                       "Product link": productLink, "Image Link": productImageLink, "category": cat.text, "website": website}
             productsList.append(product)
         except:
             continue

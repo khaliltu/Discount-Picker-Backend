@@ -17,7 +17,7 @@ api = Api(app)
 initialize_routes(api)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 scheduler.add_job(func=scrapDaily, trigger="interval",
-                  hours=int(os.environ["SCRAPING_HOURS"]))
+                  seconds=int(os.environ["SCRAPING_HOURS"]))
 scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 if __name__ == '__main__':

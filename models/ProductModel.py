@@ -1,12 +1,14 @@
 from itertools import product
 from math import prod
+from operator import le
+from random import sample
 from models.UserModel import UserModel
 from configPack import mongo
 from bson.json_util import dumps
 from bson.objectid import ObjectId
 
 from Services.scrapers.tdiscountProductScraper import getTdiscountDetails
-from .utils.ProductUtils import isSubString
+from .utils.ProductUtils import isSubString, most_frequent
 from Services.scrapers.jumiaProductScrapper import getJumiaDetails
 from Services.scrapers.ttechProductScrapper import getTTDetails
 from Services.scrapers.vongoProductScrapper import getVongoDetails
@@ -17,7 +19,12 @@ class ProductModel():
         data, code = UserModel.find(token, cleanObjects=False)
         if (code == 200):
             products = list(mongo.db.products.find())
-            data = {"products": products}
+            try:
+                recommandedProducts = getRecommandedProducts(data)
+            except:
+                recommandedProducts = sample(products, 2)
+            data = {"products": products,
+                    "recommandedProducts": recommandedProducts}
             data = dumps(data)
         return data, code
 
@@ -35,6 +42,9 @@ class ProductModel():
         if (code == 200):
             product = mongo.db.products.find_one({"_id": ObjectId(id)})
             registerProductDetails(product)
+            user = data
+            mongo.db.users.update_one({"email": user["email"]}, {"$push": {"favoriteCategories": {
+                                      "website": product["website"], "price": product["price"]}}})
             data = dumps(product)
         return data, code
 
@@ -70,3 +80,18 @@ def registerProductDetails(product):
             product["key value details"] = []
         except:
             pass
+
+
+def getRecommandedProducts(data):
+    favoriteCategories = data["favoriteCategories"]
+    bestSeller = most_frequent(
+        [element["website"] for element in favoriteCategories])
+    prices = [element["price"] for element in favoriteCategories]
+    minPrice, maxPrice = min(prices), max(prices)
+    recommendedProducts = list(mongo.db.products.find(
+        {"price": {"$gte": minPrice, "$lte": maxPrice}}))
+    recommendedProducts = [
+        product for product in recommendedProducts if product["website"] == bestSeller]
+    if(len(recommendedProducts) > 4):
+        recommendedProducts = sample(recommendedProducts, 4)
+    return recommendedProducts
