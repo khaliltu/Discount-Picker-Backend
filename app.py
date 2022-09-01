@@ -2,11 +2,11 @@ import atexit
 from flask import Flask
 from configPack import mongo, scheduler
 from models.utils.Scheduler import scrapDaily
-from resources.routes import initialize_routes
 from flask_restful import Api
 from flask_cors import CORS
 import os
 from configPack import mail
+from routes import initialize_routes
 
 
 app = Flask(__name__)
