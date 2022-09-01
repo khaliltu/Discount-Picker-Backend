@@ -1,6 +1,7 @@
-from models.ProductModel import ProductModel
 from Services.scrapers.scraper import getJumiaPromos, getTTPromos, getTdiscountPromos, getVongoPromos
 import os
+
+from models.ProductModel import ProductModel
 
 
 def scrapDaily():

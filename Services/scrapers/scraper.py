@@ -1,5 +1,5 @@
-from models.ProductModel import ProductModel
 from Services.scrapers.jumiaScraper import getProducts
+from models.ProductModel import ProductModel
 from .tdiscountScraper import getTdiscountProductsList
 from Services.scrapers.tunisiaTechScraper import getTTProductsList
 from Services.scrapers.vongoScrapper import getVongoProductsList

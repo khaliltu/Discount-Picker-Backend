@@ -2,22 +2,22 @@
 from bson import json_util
 from flask_restful import Resource
 from flask import request, Response
-from models.UserModel import UserModel
+from Services.UserService import UserService
 
 
-class UserService(Resource):
+class UserController(Resource):
     def get(self):
         token = json_util.loads(json_util.dumps(request.headers.get('token')))
-        data, code = UserModel.find(token)
+        data, code = UserService.find(token)
         return Response(data, status=code, mimetype='application/json')
 
     def post(self):
         user = json_util.loads(json_util.dumps(request.json))
-        data, code = UserModel.save(user)
+        data, code = UserService.save(user)
         return Response(data, status=code, mimetype='application/json')
 
     def put(self):
         token = json_util.loads(json_util.dumps(request.headers.get('token')))
         user = json_util.loads(json_util.dumps(request.json))
-        data, code = UserModel.update(token, user)
+        data, code = UserService.update(token, user)
         return Response(data, status=code, mimetype='application/json')
